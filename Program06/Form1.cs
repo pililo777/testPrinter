@@ -318,6 +318,7 @@ namespace testPrinter
 
             string prd;
             double precio;
+            int id;
 
 
             //SQLiteConnection.CreateFile("file.db");
@@ -334,11 +335,11 @@ namespace testPrinter
 
             while (rd.Read())
             {
+                id = (rd.GetInt16(0));
+                prd = (rd.GetString(1)).ToString();
+                precio = Convert.ToDouble (rd.GetFloat(2));
 
-                prd = (rd.GetString(0)).ToString();
-                precio = Convert.ToDouble (rd.GetFloat(1));
-
-                lista.Add(new item ( prd, precio ));
+                lista.Add(new item (  prd, precio ));
 
             }
 
