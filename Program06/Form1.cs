@@ -216,9 +216,9 @@ namespace testPrinter
                 else
                     MessageBox.Show("Failed to open printer status monitor.", "Program06", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 			}
-			catch
+			catch (Exception ex)
 			{
-                MessageBox.Show("Failed to open StatusAPI.", "Program06", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show("Failed to open StatusAPI." + ex.ToString(), "Program06", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 			}
 
         }
@@ -227,90 +227,108 @@ namespace testPrinter
         // This is where the actual printing of sample data to the printer.
         private void pdPrint_PrintPage(object sender, PrintPageEventArgs e)
         {
-            float x, y, lineOffset;
+            try {
 
-           
+                float x, y, lineOffset;
 
+                // Instantiate font objects used in printing.
+                Font printFont = new Font("Lucida Console", (float)8, FontStyle.Regular, GraphicsUnit.Point); // Substituted to FontA Font
 
+                e.Graphics.PageUnit = GraphicsUnit.Point;
 
-            // Instantiate font objects used in printing.
-            Font printFont = new Font("Lucida Console", (float)8, FontStyle.Regular, GraphicsUnit.Point); // Substituted to FontA Font
+                // Draw the bitmap
+                x = 0;
+                y = 0;
+                e.Graphics.DrawImage(pbImage.Image, x, y, pbImage.Image.Width - 13, pbImage.Image.Height - 10);
 
-            e.Graphics.PageUnit = GraphicsUnit.Point;
-
-            // Draw the bitmap
-            x = 0;
-            y = 0;
-            e.Graphics.DrawImage(pbImage.Image, x, y, pbImage.Image.Width - 13, pbImage.Image.Height - 10);
-
-            // Print the receipt text
-            lineOffset = printFont.GetHeight(e.Graphics) - (float)0.5;
-            x = 10;
-            y = 70 + lineOffset;
-            e.Graphics.DrawString("Metge Mir 23, Sabadell", printFont, Brushes.Black, x, y);
-            y += lineOffset;
-            e.Graphics.DrawString("        TEL   931 70 49 77", printFont, Brushes.Black, x, y);
-            y += lineOffset;
-            e.Graphics.DrawString(DateTime.Now.ToShortDateString(), printFont, Brushes.Black, x, y);
-            y = y + (lineOffset * (float)5) ;
-
-
-
-
-
-            //e.Graphics.DrawString("Burritos                     €20.00", printFont, Brushes.Black, x, y);
-            //y += lineOffset;
-            //e.Graphics.DrawString("Nachos                       €30.00", printFont, Brushes.Black, x, y);
-            //y += lineOffset;
-            //e.Graphics.DrawString("Bebidas                      €40.00", printFont, Brushes.Black, x, y);
-            //y += lineOffset;
-            //e.Graphics.DrawString("Postres                      €50.00", printFont, Brushes.Black, x, y);
-            //y += lineOffset;
-            //e.Graphics.DrawString("Limonada Artesanal           €60.00", printFont, Brushes.Black, x, y);
-
-            for (int i=0; i < lista.Count; i++)
-            {
-                item it = lista[i] as item;
-
-                e.Graphics.DrawString(  string.Format ("{0}   {1}",  it.prd, it.precio.ToString() ),  printFont, Brushes.Black, x, y);
+                // Print the receipt text
+                lineOffset = printFont.GetHeight(e.Graphics) - (float)0.5;
+                x = 3;
+                y = 68 + lineOffset;
+                e.Graphics.DrawString(" Metge Mir 23, Sabadell", printFont, Brushes.Black, x, y);
                 y += lineOffset;
+                e.Graphics.DrawString(" TEL   931 70 49 77", printFont, Brushes.Black, x, y);
+                y += lineOffset;
+                e.Graphics.DrawString(DateTime.Now.ToLongDateString(), printFont, Brushes.Black, x, y);
+                y = y + (lineOffset * (float)5);
+
+
+                //e.Graphics.DrawString("Burritos                     €20.00", printFont, Brushes.Black, x, y);
+                //y += lineOffset;
+                //e.Graphics.DrawString("Nachos                       €30.00", printFont, Brushes.Black, x, y);
+                //y += lineOffset;
+                //e.Graphics.DrawString("Bebidas                      €40.00", printFont, Brushes.Black, x, y);
+                //y += lineOffset;
+                //e.Graphics.DrawString("Postres                      €50.00", printFont, Brushes.Black, x, y);
+                //y += lineOffset;
+                //e.Graphics.DrawString("Limonada Artesanal           €60.00", printFont, Brushes.Black, x, y); 
+
+                string prod, precio;
+                
+                for (int i = 0; i < lista.Count; i++)
+                {
+                    item it = lista[i] as item;
+                    prod = it.prd.ToString();
+                    if (prod.Length > 23)
+                        prod = it.prd.Substring(0, 23);
+                    precio = it.precio.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-es"));
+
+                    e.Graphics.DrawString(string.Format("{0,-24} {1,7}", prod, precio), printFont, Brushes.Black, x, y);
+
+
+                    y += lineOffset;
+
+                }
+
+
+
+
+
+                y += (lineOffset * (float)5);
+                // e.Graphics.DrawString("Tax excluded.               €200.00", printFont, Brushes.Black, x, y);
+                // y += lineOffset;
+                //  e.Graphics.DrawString("Tax     5.0%                 €10.00", printFont, Brushes.Black, x, y);
+                //  y += lineOffset;
+                e.Graphics.DrawString("___________________________________", printFont, Brushes.Black, x, y);
+
+                printFont = new Font("MingLiU", 19, FontStyle.Regular, GraphicsUnit.Point);
+                lineOffset = printFont.GetHeight(e.Graphics) - 3;
+                y += lineOffset;
+                e.Graphics.DrawString("Total     €210.00", printFont, Brushes.Black, x - 1, y);
+
+                printFont = new Font("Lucida Console", (float)8, FontStyle.Regular, GraphicsUnit.Point);
+                lineOffset = printFont.GetHeight(e.Graphics);
+                y = y + lineOffset + 1;
+                // e.Graphics.DrawString("Customer's payment         €250.00", printFont, Brushes.Black, x, y);
+                //  y += lineOffset;
+                //  e.Graphics.DrawString("Change                      €40.00", printFont, Brushes.Black, x, y - 2);
+
+                // Indicate that no more data to print, and the Print Document can now send the print data to the spooler.
+                e.HasMorePages = false;
+
 
             }
 
+            catch ( Exception ex )
+            {
+                MessageBox.Show("error: " + ex.ToString(), "Program06", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
+            }
 
-
-
-            y += (lineOffset * (float)5);
-           // e.Graphics.DrawString("Tax excluded.               €200.00", printFont, Brushes.Black, x, y);
-           // y += lineOffset;
-          //  e.Graphics.DrawString("Tax     5.0%                 €10.00", printFont, Brushes.Black, x, y);
-          //  y += lineOffset;
-            e.Graphics.DrawString("___________________________________", printFont, Brushes.Black, x, y);
-
-            printFont = new Font("MingLiU", 19, FontStyle.Regular, GraphicsUnit.Point);
-            lineOffset = printFont.GetHeight(e.Graphics) - 3;
-            y += lineOffset;
-            e.Graphics.DrawString("Total     €210.00", printFont, Brushes.Black, x - 1, y);
-
-            printFont = new Font("Lucida Console", (float)8, FontStyle.Regular, GraphicsUnit.Point);
-            lineOffset = printFont.GetHeight(e.Graphics);
-            y = y + lineOffset + 1;
-           // e.Graphics.DrawString("Customer's payment         €250.00", printFont, Brushes.Black, x, y);
-          //  y += lineOffset;
-          //  e.Graphics.DrawString("Change                      €40.00", printFont, Brushes.Black, x, y - 2);
-
-            // Indicate that no more data to print, and the Print Document can now send the print data to the spooler.
-            e.HasMorePages = false;
+            
         }
 
-		// The executed function when the Close button is clicked.
-		private void cmdClose_Click(object sender, System.EventArgs e)
+       
+
+       
+
+        // The executed function when the Close button is clicked.
+        private void cmdClose_Click(object sender, System.EventArgs e)
 		{
 			Close();
 		}
 
-        private void button1_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e)  //boton leer datos
         {
             string connectionString = @"Data Source=file.db; Version=3;  Foreign Keys=True;";
             //string sql = "insert into productos (producto, precio  )  values (\"Burrito 'Charro'\", 8.50)";
@@ -318,7 +336,7 @@ namespace testPrinter
 
             string prd;
             double precio;
-            int id;
+            Int64 id;
 
 
             //SQLiteConnection.CreateFile("file.db");
@@ -335,11 +353,11 @@ namespace testPrinter
 
             while (rd.Read())
             {
-                id = (rd.GetInt16(0));
+                id = (rd.GetInt64(0));
                 prd = (rd.GetString(1)).ToString();
                 precio = Convert.ToDouble (rd.GetFloat(2));
 
-                lista.Add(new item (  prd, precio ));
+                lista.Add(new item ( id,  prd, precio ));
 
             }
 
